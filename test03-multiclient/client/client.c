@@ -14,16 +14,6 @@
 #include <sys/types.h> 
 
 #define BUFFER_SIZE 1024  
-// int fd;
-// bool open_dev()
-// {
-//     fd = open("rec_msg", O_CREAT | O_RDWR | O_APPEND,0600);
-//     if(fd < 0){
-//         printf("rec_msg is open fail!\n");
-//         return false;
-//     }
-//     return true;
-// }
 int main(int argc, const char * argv[])  
 {  
 
