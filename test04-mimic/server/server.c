@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <pthread.h>
 #include <unistd.h>
 #include <sys/select.h>
 #define BACKLOG 5        //完成三次握手但没有accept的队列的长度

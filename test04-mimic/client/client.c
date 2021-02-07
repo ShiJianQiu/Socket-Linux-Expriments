@@ -17,7 +17,9 @@
 #define SERVER_PORT_MASTER 11332
 #define SERVER_PORT_MIMIC 11335
 #define QUIT_CMD ".quit"
-
+int max(int a,int b){
+    return a>b?a:b;
+}
 int main(int argc, const char * argv[])  
 {  
     struct sockaddr_in server_addr_clint, server_addr_mimic;  

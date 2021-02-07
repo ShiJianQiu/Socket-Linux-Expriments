@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/select.h>
+#include <pthread.h>
 #define BACKLOG 5        //完成三次握手但没有accept的队列的长度
 #define CONCURRENT_MAX 8 //应用层同时可以处理的连接
 #define SERVER_PORT_MASTER 11333
@@ -232,12 +233,13 @@ int main(int argc, const char *argv[])
                                 send_to_calculator[i]->statue = DEFAULT;
                             }
                             strcpy(send_to_calculator[i]->recv_msg,recv_msg);
-                            pthread_create(&ntid[i],NULL,send_and_receive,calculator_fds[i]);
+                            pthread_create(&ntid[i],NULL,send_and_receive,send_to_calculator[i]);
                             // send(calculator_fds[i], recv_msg, sizeof(recv_msg), 0);
                         }
                         if (send_to_calculator[i]->statue = CLOSE){
                             FD_CLR(calculator_fds[i], &server_fd_set);
                             calculator_fds[i] = 0;
+                            free(send_to_calculator[i]);
                             printf("CAL端(%d)退出了\n", i);
                         }
                     }
@@ -246,7 +248,7 @@ int main(int argc, const char *argv[])
                     for (int i = 0; i < CONCURRENT_MAX; i++)
                     {
                         /* code */
-                        if (calculator_fds[i] != NULL && send_to_calculator[i]->receive_len > 0&&byte_num_mimic!=0){
+                        if (calculator_fds[i] != 0 && send_to_calculator[i]->receive_len > 0&&byte_num_mimic!=0){
                             //谁id小，谁正确
                             printf("calculator(%d):%s", i, send_to_calculator[i]->recv_msg);
                             bzero(recv_msg, BUFFER_SIZE);
@@ -254,10 +256,19 @@ int main(int argc, const char *argv[])
                             byte_num_mimic = send_to_calculator[i]->receive_len;
                         }
                         //清空
-                        if (calculator_fds[i] != NULL){
+                        if (calculator_fds[i] != 0){
                             send_to_calculator[i]->statue = DEFAULT;
                             send_to_calculator[i]->receive_len = 0;
                             bzero(send_to_calculator[i]->recv_msg, BUFFER_SIZE);
+                        }
+                    }
+                    //转发给所有的client
+                    /*转发数据给其他的客户端*/
+                    for (int i = 0; i < CONCURRENT_MAX; i++)
+                    {
+                        if (client_fds[i] != 0)
+                        {
+                            send(client_fds[i], recv_msg, sizeof(recv_msg), 0);
                         }
                     }
                 }  
