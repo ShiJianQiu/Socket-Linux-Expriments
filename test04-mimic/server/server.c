@@ -154,18 +154,9 @@ int main(int argc, char *argv[])
                 int mimic_sock_fd = accept(server_mimic_sock_fd, (struct sockaddr *)&mimic_address, &address_len);
                 printf("new connection mimic_sock_fd = %d\n", mimic_sock_fd);
                 if(mimic_sock_fd > 0){
-                    if(mimic_sock_fd > 0){
-                        mimic_fd = mimic_sock_fd;
-                        printf("新中转端(mimic_fd = %d)加入成功 %s:%d\n", mimic_fd, inet_ntoa(mimic_address.sin_addr), ntohs(mimic_address.sin_port));
-                    }else{
-                        //将input_msg清零
-                        bzero(input_msg, BUFFER_SIZE);
-                        strcpy(input_msg, "服务器已有中转节点，无法加入!\n");
-                        send(mimic_sock_fd, input_msg, BUFFER_SIZE, 0);
-                        printf("中转端连接数达到最大值，新中转端加入失败 %s:%d\n", inet_ntoa(mimic_address.sin_addr), ntohs(mimic_address.sin_port));
-                    }
+                    mimic_fd = mimic_sock_fd;
+                    printf("新中转端(mimic_fd = %d)加入成功 %s:%d\n", mimic_fd, inet_ntoa(mimic_address.sin_addr), ntohs(mimic_address.sin_port));
                 }
-
             }
             if (FD_ISSET(server_client_sock_fd, &server_fd_set))
             {
@@ -226,11 +217,18 @@ int main(int argc, char *argv[])
                             // }
                             if(mimic_fd != 0){
                                 send(mimic_fd, recv_msg, sizeof(recv_msg), 0);
-                                printf("转发给中转端(%d):%s", i, recv_msg);
+                                printf("转发给中转端:%s", recv_msg);
                             }
                             /*结束转发内容*/
                             bzero(recv_msg, BUFFER_SIZE);
-                            // int recv_len = recv(mimic_fd, recv_msg, BUFFER_SIZE, 0);
+                            byte_num = recv(mimic_fd, recv_msg, BUFFER_SIZE, 0);
+                            if (byte_num > BUFFER_SIZE)
+                            {
+                                byte_num = BUFFER_SIZE;
+                            }
+                            printf("接受中转端:%s\n", recv_msg);
+                            send(client_fds[i],recv_msg,sizeof(recv_msg),0);
+                            printf("返回客户端(%d):%s\n", i, recv_msg);
                         }
                         else if (byte_num < 0)
                         {

@@ -39,6 +39,8 @@ int main(int argc, const char * argv[])
     //TCP,客户端主动连接服务器
     if(connect(server_sock_fd, (struct sockaddr *)&server_addr_clint, sizeof(struct sockaddr_in)) == 0)  
     {  
+        printf("connect with a mimic, server_sock_fd = %d\n",server_sock_fd);
+
         fd_set client_fd_set;  //一个集合，这个集合中存放的是文件描述符(filedescriptor)，即文件句柄
         struct timeval tv;  //它指明我们要等待的时间：
         // open_dev();//打开驱动的设备节点.无则删除

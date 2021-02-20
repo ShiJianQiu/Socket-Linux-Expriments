@@ -29,7 +29,7 @@ int main(int argc, const char * argv[])
     bzero(&(server_addr_clint.sin_zero), 8);  
 
     server_addr_mimic.sin_family = AF_INET;  
-    server_addr_mimic.sin_port = htons(SERVER_PORT_MASTER);  
+    server_addr_mimic.sin_port = htons(SERVER_PORT_MIMIC);  
     server_addr_mimic.sin_addr.s_addr = inet_addr("0.0.0.0");
     bzero(&(server_addr_mimic.sin_zero), 8); 
     //建立socket连接，AF_INET : TCP/IP-IPV4，SOCK_STREAM : TCP类型
@@ -51,22 +51,21 @@ int main(int argc, const char * argv[])
     fd_set client_fd_set;  //一个集合，这个集合中存放的是文件描述符(filedescriptor)，即文件句柄
     struct timeval tv;  //它指明我们要等待的时间：
 
-    
+        //TCP,客户端主动连接服务器
+    if(connect(server_master_sock_fd, (struct sockaddr *)&server_addr_clint, sizeof(struct sockaddr_in)) < 0)  
+    { 
+        printf("Master服务器端连接失败!\n");
+        return 1;
+    }  
+    if(connect(server_mimic_sock_fd, (struct sockaddr *)&server_addr_mimic, sizeof(struct sockaddr_in)) < 0)  
+    { 
+        printf("Mimic服务器端连接失败!\n");
+        return 1;
+    }
  
     // open_dev();//打开驱动的设备节点.无则删除
     while(1)  
     {
-        //TCP,客户端主动连接服务器
-        if(connect(server_master_sock_fd, (struct sockaddr *)&server_addr_clint, sizeof(struct sockaddr_in)) < 0)  
-        { 
-            printf("Master服务器端连接失败!\n");
-            break;
-        }  
-        if(connect(server_mimic_sock_fd, (struct sockaddr *)&server_addr_mimic, sizeof(struct sockaddr_in)) < 0)  
-        { 
-            printf("Mimic服务器端连接失败!\n");
-            break;
-        }  
         tv.tv_sec = 20;//秒
         tv.tv_usec = 0;//毫秒
         FD_ZERO(&client_fd_set); //将指定的文件描述符集清空，在对文件描述符集合进行设置前，必须对其进行初始化
@@ -96,7 +95,7 @@ int main(int argc, const char * argv[])
                 perror("发送消息出错!\n");  
             }  
             bzero(recv_msg, BUFFER_SIZE);  
-            long byte_num = recv(server_mimic_sock_fd, recv_msg, BUFFER_SIZE, 0);  
+            long byte_num = recv(server_master_sock_fd, recv_msg, BUFFER_SIZE, 0);  
             if(byte_num > 0)  
             {  
                 if(byte_num > BUFFER_SIZE)  
@@ -107,7 +106,7 @@ int main(int argc, const char * argv[])
 
                 /*此处可以添加控制信息*/
 
-                printf("中转服务器:%s\n", recv_msg);  
+                printf("接受Master服务器:%s\n", recv_msg);  
             }  
             else if(byte_num < 0)  
             {  

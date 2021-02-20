@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT(server, 1.2, shiyufeng1997@qq.com)
 AC_CONFIG_SRCDIR([server.c])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE(client,1.2)
+AM_INIT_AUTOMAKE(server,1.2)
 # Checks for programs.
 AC_PROG_CC
 
